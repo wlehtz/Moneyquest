@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoneyQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-logo">MQ</div>
+      <h2>MoneyQuest</h2>
+      <p>Faça login para gerenciar finanças e ganhar XP</p>
+    </div>
+
+    <div class="form-group">
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" placeholder="usuario@exemplo.com" />
+    </div>
+    <div class="form-group">
+      <label for="loginPassword">Senha</label>
+      <div class="password-wrap">
+        <input type="password" id="loginPassword" placeholder="********" />
+        <button type="button" class="show-password-btn" onclick="togglePassword()">👁</button>
+      </div>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <label><input type="checkbox" id="rememberMe" /> Lembrar-me</label>
+      <a href="#" onclick="forgotPassword(event)">Esqueci a senha</a>
+    </div>
+
+    <div class="login-actions">
+      <button class="btn btn-primary" onclick="attemptLogin()">Entrar</button>
+    </div>
+
+    <div class="login-divider"><span>ou</span></div>
+    <div class="social-buttons">
+      <button class="btn btn-ghost btn-sm" onclick="alert('Login social ainda não implementado')">Google</button>
+      <button class="btn btn-ghost btn-sm" onclick="alert('Login social ainda não implementado')">Facebook</button>
+    </div>
+
+    <div id="loginMsg" class="login-msg"></div>
+    <p class="login-footer">Novo por aqui? Use <strong>demo@moneyquest.com / dem0</strong></p>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">MQ</div>
+      <div class="logo-text">
+        <div class="name">Money<span>Quest</span></div>
+        <div class="sub">Controle Financeiro</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Principal</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="transactions" onclick="navigate('transactions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        Transações
+      </div>
+      <div class="nav-item" data-page="cofrinho" onclick="navigate('cofrinho')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11V9a7 7 0 10-13.9 1.4M15 11v1.5M19 11h1a1 1 0 011 1v1a1 1 0 01-1 1h-1.4a7.05 7.05 0 01-4.6 4.8V21h-3v-1.7A7 7 0 015.1 15H5a1 1 0 01-1-1v-1a1 1 0 011-1h1"/></svg>
+        Cofrinho
+      </div>
+      <div class="nav-item" data-page="goals" onclick="navigate('goals')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Metas
+      </div>
+
+      <div class="nav-group-label">Gamificação</div>
+      <div class="nav-item" data-page="missions" onclick="navigate('missions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Missões Diárias
+      </div>
+      <div class="nav-item" data-page="videos" onclick="navigate('videos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polygon points="10,8 16,11 10,14"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Vídeos Educativos
+      </div>
+      <div class="nav-item" data-page="achievements" onclick="navigate('achievements')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Conquistas
+      </div>
+      <div class="nav-item" data-page="rewards" onclick="navigate('rewards')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,12 20,22 4,22 4,12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+        Recompensas
+      </div>
+      <div class="nav-item" data-page="leaderboard" onclick="navigate('leaderboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Ranking Global
+      </div>
+      <div class="nav-item" data-page="profile" onclick="navigate('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z"/><path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"/></svg>
+        Perfil
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card" onclick="navigate('profile')" title="Abrir configurações do usuário">
+        <div class="user-row">
+          <div class="user-avatar" id="sbAvatar">JS</div>
+          <div>
+            <div class="user-name" id="sbName">Carregando...</div>
+            <div class="user-level" id="sbLevel">Nível 1</div>
+          </div>
+        </div>
+        <div class="xp-row">
+          <span class="xp-label" id="sbXP">0 XP</span>
+          <span class="xp-value" id="sbXPNext">→ 100</span>
+        </div>
+        <div class="xp-bar"><div class="xp-bar-fill" id="sbXPBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="topbar-page" id="tbPage">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="xp-badge">⚡ <span id="tbXP">0</span> XP</div>
+        <div class="level-badge">★ <span id="tbLevel">Bronze I</span></div>
+        <button class="btn btn-ghost btn-sm" style="padding:5px 10px;" onclick="logout()">Sair</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="section active" id="sec-dashboard">
+        <div class="page-header">
+          <div class="page-title">Olá, <span id="dashHi" class="gradient-text">Guerreiro</span>! 👋</div>
+          <div class="page-subtitle" id="dashDate">Aqui está o resumo financeiro de hoje.</div>
+        </div>
+        <div id="dashContent"></div>
+      </section>
+
+      <!-- TRANSACTIONS -->
+      <section class="section" id="sec-transactions">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="page-title">Transações</div>
+            <div class="page-subtitle">Histórico de entradas e saídas</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('txModal')">+ Nova Transação</button>
+        </div>
+        <div id="txContent"></div>
+      </section>
+
+      <!-- COFRINHO -->
+      <section class="section" id="sec-cofrinho">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="page-title">🐷 Cofrinho</div>
+            <div class="page-subtitle">Guarde um pouquinho por vez — cada centavo conta</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('cofrinhoModal')">+ Novo Cofrinho</button>
+        </div>
+        <div id="cofrinhoContent"></div>
+      </section>
+
+      <!-- GOALS -->
+      <section class="section" id="sec-goals">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="page-title">Metas Financeiras</div>
+            <div class="page-subtitle">Defina objetivos e ganhe XP ao concluir</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('goalModal')">+ Nova Meta</button>
+        </div>
+        <div id="goalsContent"></div>
+      </section>
+
+      <!-- MISSIONS -->
+      <section class="section" id="sec-missions">
+        <div class="page-header">
+          <div class="page-title">Missões Diárias</div>
+          <div class="page-subtitle">Complete as missões de hoje para ganhar XP</div>
+        </div>
+        <div id="missContent"></div>
+      </section>
+
+      <!-- VIDEOS -->
+      <section class="section" id="sec-videos">
+        <div class="page-header">
+          <div class="page-title">Educação Financeira</div>
+          <div class="page-subtitle">Assista vídeos gratuitos e aprenda a controlar melhor o dinheiro</div>
+        </div>
+        <div id="videoContent"></div>
+      </section>
+
+      <!-- ACHIEVEMENTS -->
+      <section class="section" id="sec-achievements">
+        <div class="page-header">
+          <div class="page-title">Conquistas</div>
+          <div class="page-subtitle">Desbloqueie conquistas conforme você avança</div>
+        </div>
+        <div id="achContent"></div>
+      </section>
+
+      <!-- REWARDS -->
+      <section class="section" id="sec-rewards">
+        <div class="page-header">
+          <div class="page-title">🎁 Loja de Recompensas</div>
+          <div class="page-subtitle">Troque seu XP por recompensas — você merece!</div>
+        </div>
+        <div id="rewContent"></div>
+      </section>
+
+      <!-- LEADERBOARD -->
+      <section class="section" id="sec-leaderboard">
+        <div class="page-header">
+          <div class="page-title">🏆 Ranking Global</div>
+          <div class="page-subtitle">Compare sua posição com outros usuários do MoneyQuest</div>
+        </div>
+        <div id="lbContent"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="section" id="sec-profile">
+        <div class="page-header">
+          <div class="page-title">👤 Meu Perfil</div>
+          <div class="page-subtitle">Atualize suas informações de usuário</div>
+        </div>
+        <div class="card">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="profileName" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="profileEmail" disabled />
+          </div>
+          <div class="form-group">
+            <label>Nível</label>
+            <input type="text" id="profileLevel" disabled />
+          </div>
+          <div class="form-group">
+            <label>XP atual</label>
+            <input type="text" id="profileXP" disabled />
+          </div>
+          <div class="form-group">
+            <label>Meta de economia (R$)</label>
+            <input type="number" id="profileGoal" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label>Senha atual</label>
+            <input type="password" id="profileCurrentPassword" placeholder="********" />
+          </div>
+          <div class="form-group">
+            <label>Nova senha</label>
+            <input type="password" id="profileNewPassword" placeholder="********" />
+          </div>
+          <div class="form-group">
+            <label>Notificações de missões</label>
+            <select id="profileNotif">
+              <option value="on">Ativas</option>
+              <option value="off">Desativadas</option>
+            </select>
+          </div>
+          <div class="modal-footer" style="padding:0;margin-top:10px;justify-content:flex-start;">
+            <button class="btn btn-primary" onclick="saveProfile()">Salvar perfil</button>
+            <button class="btn btn-ghost" onclick="logout()">Sair</button>
+          </div>
+          <div id="profileMsg" style="margin-top:8px;color:var(--text2);font-size:13px"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toasts" class="toasts"></div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeAllModals()"></div>
+
+<!-- MODAL: NOVA TRANSAÇÃO -->
+<div class="modal" id="txModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Nova Transação</h3>
+      <button class="modal-close" onclick="closeModal('txModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Tipo</label>
+      <select id="txType">
+        <option value="deposit">Entrada (salário, bico...)</option>
+        <option value="withdraw">Saída (gasto, conta...)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Valor (R$)</label>
+      <input type="number" id="txAmt" placeholder="0,00" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label>Descrição</label>
+      <input type="text" id="txDesc" placeholder="Ex: Salário, Aluguel, Mercado..." />
+    </div>
+    <div class="form-group">
+      <label>Categoria</label>
+      <select id="txCat">
+        <optgroup label="Entradas">
+          <option value="salario">Salário / Holerite</option>
+          <option value="bico">Bico / Freela</option>
+          <option value="beneficio">Benefício (BPC, Bolsa Família...)</option>
+          <option value="outros-entrada">Outros ganhos</option>
+        </optgroup>
+        <optgroup label="Saídas">
+          <option value="moradia">Moradia / Aluguel</option>
+          <option value="alimentacao">Alimentação / Mercado</option>
+          <option value="transporte">Transporte</option>
+          <option value="saude">Saúde / Remédio</option>
+          <option value="educacao">Educação</option>
+          <option value="contas">Contas (luz, água, gás)</option>
+          <option value="telefone">Telefone / Internet</option>
+          <option value="vestuario">Roupas / Calçados</option>
+          <option value="divida">Dívida / Parcela</option>
+          <option value="outros">Outros gastos</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('txModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitTx()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO COFRINHO -->
+<div class="modal" id="cofrinhoModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>🐷 Novo Cofrinho</h3>
+      <button class="modal-close" onclick="closeModal('cofrinhoModal')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Guarde dinheiro aos poucos para um objetivo. Pode ser qualquer coisa!</p>
+    <div class="form-group">
+      <label>Para quê?</label>
+      <input type="text" id="cofNome" placeholder="Ex: Quitar a dívida, tênis novo, emergência..." />
+    </div>
+    <div class="form-group">
+      <label>Quanto precisa guardar? (R$)</label>
+      <input type="number" id="cofMeta" placeholder="0,00" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label>Já guardou alguma coisa? (R$)</label>
+      <input type="number" id="cofGuardado" placeholder="0,00" min="0" step="0.01" value="0" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('cofrinhoModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitCofrinho()">Criar cofrinho</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DEPOSITAR COFRINHO -->
+<div class="modal" id="cofDepModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>🐷 Guardar dinheiro</h3>
+      <button class="modal-close" onclick="closeModal('cofDepModal')">✕</button>
+    </div>
+    <p id="cofDepNome" style="font-size:14px;color:var(--text2);margin-bottom:16px"></p>
+    <div class="form-group">
+      <label>Quanto você está guardando agora? (R$)</label>
+      <input type="number" id="cofDepVal" placeholder="0,00" min="0" step="0.01" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('cofDepModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitDeposito()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVA META -->
+<div class="modal" id="goalModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Nova Meta</h3>
+      <button class="modal-close" onclick="closeModal('goalModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nome da meta</label>
+      <input type="text" id="gTitle" placeholder="Ex: Zerar a dívida do cartão..." />
+    </div>
+    <div class="form-group">
+      <label>Categoria</label>
+      <select id="gCat">
+        <option value="divida">Zerar dívida</option>
+        <option value="emergencia">Fundo de emergência</option>
+        <option value="compra">Compra importante</option>
+        <option value="educacao">Educação</option>
+        <option value="viagem">Viagem</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Valor necessário (R$)</label>
+      <input type="number" id="gTarget" placeholder="0,00" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label>Prazo</label>
+      <input type="date" id="gDeadline" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('goalModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitGoal()">Criar meta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PROGRESSO META -->
+<div class="modal" id="gpModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Adicionar progresso</h3>
+      <button class="modal-close" onclick="closeModal('gpModal')">✕</button>
+    </div>
+    <p id="gpDesc" style="font-size:13px;color:var(--text2);margin-bottom:16px"></p>
+    <div class="form-group">
+      <label>Quanto você guardou? (R$)</label>
+      <input type="number" id="gpAmt" placeholder="0,00" min="0" step="0.01" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('gpModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitGP()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VÍDEO -->
+<div class="modal modal-lg" id="videoModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="vmTitle">Vídeo</h3>
+      <button class="modal-close" onclick="closeModal('videoModal')">✕</button>
+    </div>
+    <div class="video-embed-wrap">
+      <iframe id="vmFrame" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    </div>
+    <div style="margin-top:12px">
+      <p id="vmDesc" style="font-size:13px;color:var(--text2);margin-bottom:6px"></p>
+      <p id="vmDur" style="font-size:12px;color:var(--text3)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('videoModal')">Fechar</button>
+      <button class="btn btn-gold" id="vmWatchBtn" onclick="markWatched()">⚡ Marcar como assistido</button>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
