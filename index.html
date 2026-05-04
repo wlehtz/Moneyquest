@@ -10,6 +10,41 @@
 </head>
 <body>
 
+<!-- SVG COLOR BLIND FILTERS -->
+<svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <filter id="a11y-protanopia">
+      <feColorMatrix type="matrix" values="
+        0.567 0.433 0     0 0
+        0.558 0.442 0     0 0
+        0     0.242 0.758 0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="a11y-deuteranopia">
+      <feColorMatrix type="matrix" values="
+        0.625 0.375 0   0 0
+        0.7   0.3   0   0 0
+        0     0.3   0.7 0 0
+        0     0     0   1 0"/>
+    </filter>
+    <filter id="a11y-tritanopia">
+      <feColorMatrix type="matrix" values="
+        0.95  0.05  0     0 0
+        0     0.433 0.567 0 0
+        0     0.475 0.525 0 0
+        0     0     0     1 0"/>
+    </filter>
+    <filter id="a11y-achromatopsia">
+      <feColorMatrix type="matrix" values="
+        0.299 0.587 0.114 0 0
+        0.299 0.587 0.114 0 0
+        0.299 0.587 0.114 0 0
+        0     0     0     1 0"/>
+    </filter>
+  </defs>
+</svg>
+
+
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
     <div class="login-header">
@@ -283,6 +318,44 @@
           </div>
           <div id="profileMsg" style="margin-top:8px;color:var(--text2);font-size:13px"></div>
         </div>
+
+      <!-- ACESSIBILIDADE -->
+      <div class="card a11y-card">
+        <div class="a11y-section-title">♿ Acessibilidade</div>
+
+        <div class="form-group">
+          <label>Tamanho da fonte</label>
+          <select id="a11yFont">
+            <option value="normal">Normal</option>
+            <option value="grande">Grande (115%)</option>
+            <option value="muito-grande">Muito grande (127%)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Modo de visão — daltonismo</label>
+          <select id="a11yVision">
+            <option value="normal">Visão normal</option>
+            <option value="protanopia">Protanopia — dificuldade com vermelho</option>
+            <option value="deuteranopia">Deuteranopia — dificuldade com verde</option>
+            <option value="tritanopia">Tritanopia — dificuldade com azul/amarelo</option>
+            <option value="achromatopsia">Acromatopsia — sem cores (tons de cinza)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tema do app</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+            <button type="button" class="a11y-theme-btn" id="btnThemeDark"  onclick="setThemePref('dark')">🌙 Escuro</button>
+            <button type="button" class="a11y-theme-btn" id="btnThemeLight" onclick="setThemePref('light')">☀️ Claro</button>
+          </div>
+        </div>
+
+        <div style="margin-top:6px">
+          <button class="btn btn-primary" onclick="saveAccessibility()">Salvar acessibilidade</button>
+        </div>
+        <div id="a11yMsg" style="margin-top:10px;font-size:13px;color:var(--green2)"></div>
+      </div>
       </section>
 
     </div>
@@ -291,6 +364,9 @@
 
 <!-- TOAST -->
 <div id="toasts" class="toasts"></div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <!-- OVERLAY -->
 <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
