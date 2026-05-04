@@ -1221,6 +1221,18 @@ const A11Y_KEY = 'mq_a11y';
 function loadAccessibility() {
   const saved = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
   applyAccessibility(saved);
+  _ttsEnabled = !!saved.tts;
+  _guideActive = !!saved.guide;
+  if (saved.guide) {
+    const g = document.getElementById('readingGuide');
+    if (g) g.style.display = 'block';
+  }
+  if (saved.voice) {
+    setTimeout(() => {
+      const vt = document.getElementById('voiceToggle');
+      if (vt) { vt.checked = true; setVoiceNav(true); }
+    }, 1500);
+  }
 }
 
 function applyAccessibility(s) {
@@ -1228,6 +1240,13 @@ function applyAccessibility(s) {
   html.dataset.theme  = s.theme  || 'dark';
   html.dataset.font   = s.font   || 'normal';
   html.dataset.vision = s.vision || 'normal';
+  if (s.motion) html.dataset.motion = 'reduce'; else delete html.dataset.motion;
+  if (s.tts)   _ttsEnabled = true;
+  if (s.guide) {
+    _guideActive = true;
+    const g = document.getElementById('readingGuide');
+    if (g) g.style.display = 'block';
+  }
 }
 
 function setThemePref(theme) {
@@ -1239,18 +1258,19 @@ function setThemePref(theme) {
 }
 
 function updateThemeButtons(theme) {
-  const btnDark  = document.getElementById('btnThemeDark');
-  const btnLight = document.getElementById('btnThemeLight');
-  if (btnDark)  btnDark.classList.toggle('active',  theme === 'dark');
-  if (btnLight) btnLight.classList.toggle('active', theme === 'light');
+  ['dark','light','contrast'].forEach(t => {
+    const btn = document.getElementById('btnTheme' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) btn.classList.toggle('active', theme === t);
+  });
 }
 
 function saveAccessibility() {
   const font   = document.getElementById('a11yFont')   ? document.getElementById('a11yFont').value   : 'normal';
   const vision = document.getElementById('a11yVision') ? document.getElementById('a11yVision').value : 'normal';
   const theme  = document.documentElement.dataset.theme || 'dark';
+  const prev   = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
 
-  const s = { font, vision, theme };
+  const s = { ...prev, font, vision, theme };
   localStorage.setItem(A11Y_KEY, JSON.stringify(s));
   applyAccessibility(s);
   updateThemeButtons(theme);
@@ -1271,6 +1291,306 @@ function populateA11yForm() {
   if (visionEl) visionEl.value = s.vision || 'normal';
   updateThemeButtons(s.theme || 'dark');
 }
+
+
+// ===== ACESSIBILIDADE AVANÇADA =====
+
+// --- Painel flutuante ---
+function toggleA11yPanel() {
+  const panel = document.getElementById('a11yPanel');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'flex';
+  panel.style.flexDirection = 'column';
+  if (!isOpen) syncA11yPanelUI();
+}
+
+function syncA11yPanelUI() {
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  // toggles
+  const tts    = document.getElementById('ttsToggle');
+  const guide  = document.getElementById('guideToggle');
+  const motion = document.getElementById('motionToggle');
+  if (tts)    tts.checked    = !!s.tts;
+  if (guide)  guide.checked  = !!s.guide;
+  if (motion) motion.checked = !!s.motion;
+  // read btn
+  const readBtn = document.getElementById('readPageBtn');
+  if (readBtn) readBtn.disabled = !s.tts;
+  // theme buttons
+  updateThemeButtons(s.theme || 'dark');
+  // font buttons
+  document.querySelectorAll('.a11y-size-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.font === (s.font || 'normal'));
+  });
+  // vision select
+  const v2 = document.getElementById('a11yVision2');
+  if (v2) v2.value = s.vision || 'normal';
+  // profile form (if open)
+  const fontEl   = document.getElementById('a11yFont');
+  const visionEl = document.getElementById('a11yVision');
+  if (fontEl)   fontEl.value   = s.font   || 'normal';
+  if (visionEl) visionEl.value = s.vision || 'normal';
+}
+
+
+
+// --- Configurações visuais ---
+function setFontPref(font) {
+  document.documentElement.dataset.font = font;
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  s.font = font;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+  document.querySelectorAll('.a11y-size-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.font === font);
+  });
+  const fontEl = document.getElementById('a11yFont');
+  if (fontEl) fontEl.value = font;
+}
+
+function setVisionPref(vision) {
+  document.documentElement.dataset.vision = vision;
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  s.vision = vision;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+  const v2 = document.getElementById('a11yVision2');
+  if (v2) v2.value = vision;
+  const v1 = document.getElementById('a11yVision');
+  if (v1) v1.value = vision;
+}
+
+
+
+// --- Reduzir movimento ---
+function setReduceMotion(enabled) {
+  document.documentElement.dataset.motion = enabled ? 'reduce' : '';
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  s.motion = enabled;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+}
+
+// --- Guia de leitura ---
+let _guideActive = false;
+function setReadingGuide(enabled) {
+  _guideActive = enabled;
+  const guide = document.getElementById('readingGuide');
+  if (!guide) return;
+  guide.style.display = enabled ? 'block' : 'none';
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  s.guide = enabled;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+}
+document.addEventListener('mousemove', e => {
+  if (!_guideActive) return;
+  const guide = document.getElementById('readingGuide');
+  if (guide) guide.style.top = (e.clientY - 18) + 'px';
+});
+
+// --- Narração (Text-to-Speech) ---
+let _ttsEnabled = false;
+function setTTS(enabled) {
+  _ttsEnabled = enabled;
+  const readBtn = document.getElementById('readPageBtn');
+  if (readBtn) readBtn.disabled = !enabled;
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  s.tts = enabled;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+  if (!enabled && window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+function a11ySpeak(text, priority) {
+  if (!_ttsEnabled || !window.speechSynthesis) return;
+  if (priority) window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'pt-BR';
+  utt.rate = 0.92;
+  utt.pitch = 1;
+  // prefer a Portuguese voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const ptVoice = voices.find(v => v.lang.startsWith('pt'));
+  if (ptVoice) utt.voice = ptVoice;
+  window.speechSynthesis.speak(utt);
+  // ARIA live
+  const live = document.getElementById('ariaLive');
+  if (live) { live.textContent = ''; setTimeout(() => { live.textContent = text; }, 50); }
+}
+
+function a11yReadPage() {
+  const active = document.querySelector('.section.active');
+  if (!active) { a11ySpeak('Nenhuma página ativa', true); return; }
+  const title = active.querySelector('.page-title')?.textContent?.trim() || '';
+  const stats = [...active.querySelectorAll('.stat-card')].map(card => {
+    const label = card.querySelector('.stat-card-label')?.textContent?.trim() || '';
+    const value = card.querySelector('.stat-card-value')?.textContent?.trim() || '';
+    return label && value ? `${label}: ${value}` : '';
+  }).filter(Boolean);
+  const txRows = [...active.querySelectorAll('.tx-desc')].slice(0,3).map(el => el.textContent.trim());
+  const parts = [
+    title ? `Você está na página ${title}.` : '',
+    stats.length ? 'Resumo: ' + stats.join('. ') : '',
+    txRows.length ? 'Últimas transações: ' + txRows.join(', ') : '',
+  ].filter(Boolean);
+  a11ySpeak(parts.join(' ') || 'Página sem conteúdo resumido.', true);
+}
+
+// auto-read on navigate if TTS on
+const _origNavigate = typeof navigate === 'function' ? navigate : null;
+
+// --- Comandos de voz ---
+let _voiceActive = false;
+let _recognition = null;
+
+function setVoiceNav(enabled) {
+  _voiceActive = enabled;
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  s.voice = enabled;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+  const voiceBox = document.getElementById('voiceBox');
+  if (voiceBox) voiceBox.style.display = enabled ? 'flex' : 'none';
+
+  if (enabled) {
+    startVoiceRecognition();
+  } else {
+    stopVoiceRecognition();
+  }
+}
+
+const VOICE_CMDS = {
+  'dashboard':    () => navigate('dashboard'),
+  'início':       () => navigate('dashboard'),
+  'inicio':       () => navigate('dashboard'),
+  'transações':   () => navigate('transactions'),
+  'transacoes':   () => navigate('transactions'),
+  'cofrinho':     () => navigate('cofrinho'),
+  'metas':        () => navigate('goals'),
+  'missões':      () => navigate('missions'),
+  'missoes':      () => navigate('missions'),
+  'vídeos':       () => navigate('videos'),
+  'videos':       () => navigate('videos'),
+  'educação':     () => navigate('videos'),
+  'conquistas':   () => navigate('achievements'),
+  'recompensas':  () => navigate('rewards'),
+  'ranking':      () => navigate('leaderboard'),
+  'perfil':       () => navigate('profile'),
+  'sair':         () => logout(),
+  'ler':          () => a11yReadPage(),
+  'fechar':       () => closeAllModals(),
+};
+
+function normalizeText(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+const VOICE_CMDS_NORMALIZED = Object.fromEntries(
+  Object.entries(VOICE_CMDS).map(([k, v]) => [normalizeText(k), v])
+);
+
+function startVoiceRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    toast('Comandos de voz não suportados neste navegador. Use Chrome.', 'error');
+    const vt = document.getElementById('voiceToggle');
+    if (vt) vt.checked = false;
+    _voiceActive = false;
+    return;
+  }
+  if (_recognition) { try { _recognition.abort(); } catch(e) {} _recognition = null; }
+
+  _recognition = new SR();
+  _recognition.lang = 'pt-BR';
+  _recognition.continuous = false;
+  _recognition.interimResults = true;
+  _recognition.maxAlternatives = 3;
+
+  _recognition.onresult = (e) => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        for (let j = 0; j < e.results[i].length; j++) {
+          transcript = e.results[i][j].transcript;
+          if (processVoiceCmd(transcript)) break;
+        }
+      } else {
+        transcript = e.results[i][0].transcript;
+      }
+    }
+    const heard = document.getElementById('voiceHeard');
+    if (heard && transcript) heard.textContent = '"' + transcript + '"';
+  };
+
+  _recognition.onstart = () => {
+    const waves = document.getElementById('voiceWaves');
+    if (waves) waves.classList.add('listening');
+    const heard = document.getElementById('voiceHeard');
+    if (heard) heard.textContent = 'ouvindo...';
+  };
+
+  _recognition.onend = () => {
+    if (_voiceActive) {
+      setTimeout(() => {
+        if (!_voiceActive) return;
+        try {
+          if (_recognition) _recognition.start();
+          else startVoiceRecognition();
+        } catch(e) {
+          _recognition = null;
+          startVoiceRecognition();
+        }
+      }, 300);
+    } else {
+      const waves = document.getElementById('voiceWaves');
+      if (waves) waves.classList.remove('listening');
+    }
+  };
+
+  _recognition.onerror = (e) => {
+    const heard = document.getElementById('voiceHeard');
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      toast('Microfone bloqueado. Permita o acesso ao microfone no navegador.', 'error');
+      _voiceActive = false;
+      const vt = document.getElementById('voiceToggle');
+      if (vt) vt.checked = false;
+      const vb = document.getElementById('voiceBox');
+      if (vb) vb.style.display = 'none';
+      const waves = document.getElementById('voiceWaves');
+      if (waves) waves.classList.remove('listening');
+      if (heard) heard.textContent = 'microfone bloqueado';
+    } else if (e.error === 'no-speech') {
+      if (heard) heard.textContent = 'nenhuma fala detectada...';
+    } else if (e.error === 'aborted') {
+      // normal stop, ignore
+    } else {
+      if (heard) heard.textContent = 'erro: ' + e.error;
+      if (_voiceActive) setTimeout(() => { if (_voiceActive) startVoiceRecognition(); }, 1500);
+    }
+  };
+
+  try { _recognition.start(); } catch(e) {
+    setTimeout(() => { if (_voiceActive) startVoiceRecognition(); }, 500);
+  }
+}
+
+function stopVoiceRecognition() {
+  _voiceActive = false;
+  if (_recognition) { try { _recognition.abort(); } catch(e) {} _recognition = null; }
+  const waves = document.getElementById('voiceWaves');
+  if (waves) waves.classList.remove('listening');
+}
+
+function processVoiceCmd(transcript) {
+  const norm = normalizeText(transcript);
+  for (const [cmd, action] of Object.entries(VOICE_CMDS_NORMALIZED)) {
+    if (norm.includes(cmd)) {
+      action();
+      const original = Object.keys(VOICE_CMDS).find(k => normalizeText(k) === cmd) || cmd;
+      toast('🎤 "' + original + '" reconhecido', 'success');
+      return true;
+    }
+  }
+  return false;
+}
+
+
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
