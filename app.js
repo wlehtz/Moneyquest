@@ -39,12 +39,12 @@ const GOAL_LABEL = {
 };
 
 const VIDEOS = [
-  { id:1, title:'Construindo um orçamento com R$0', instructor:'Finance Tip', category:'orcamento', difficulty:'iniciante', durationMinutes:13, youtubeId:'dQw4w9WgXcQ', xpReward:80, description:'Passo a passo para criar orçamento pessoal e manter controle.' },
-  { id:2, title:'Economizando sem sofrer', instructor:'Smart Money', category:'orcamento', difficulty:'iniciante', durationMinutes:14, youtubeId:'9bZkp7q19f0', xpReward:60, description:'Técnicas fáceis de cortar despesas e poupar mês a mês.' },
-  { id:3, title:'Fundo de emergência de verdade', instructor:'EducaFin', category:'orcamento', difficulty:'iniciante', durationMinutes:12, youtubeId:'3JZ_D3ELwOQ', xpReward:60, description:'Como montar fundo de emergência em 3 etapas simples.' },
-  { id:4, title:'Negociando contas e dívidas', instructor:'Papo Financeiro', category:'divida', difficulty:'iniciante', durationMinutes:10, youtubeId:'fJ9rUzIMcZQ', xpReward:50, description:'Como renegociar dívidas com banco e sair do vermelho.' },
-  { id:5, title:'Ideias de renda extra em 2026', instructor:'Renda Hoje', category:'renda', difficulty:'iniciante', durationMinutes:20, youtubeId:'LXb3EKWsInQ', xpReward:70, description:'Rendas paralelas que cabem em qualquer rotina.' },
-  { id:6, title:'Supermercado inteligente', instructor:'Compras Inteligentes', category:'orcamento', difficulty:'iniciante', durationMinutes:15, youtubeId:'2Vv-BfVoq4g', xpReward:55, description:'Melhores práticas para gastar menos e comer bem.' },
+  { id:1, title:'Planejamento financeiro passo a passo', instructor:'Me Poupe!', category:'orcamento', difficulty:'iniciante', durationMinutes:18, youtubeId:'x4GjlfW0foY', xpReward:80, description:'Nathalia Arcuri mostra o passo a passo completo de como ela saiu do zero e montou um planejamento financeiro sólido.' },
+  { id:2, title:'7 dicas para quem ganha pouco economizar', instructor:'O Primo Rico', category:'orcamento', difficulty:'iniciante', durationMinutes:11, youtubeId:'nX5nPjcVP_I', xpReward:60, description:'Thiago Nigro ensina 7 estratégias práticas para economizar dinheiro mesmo com renda baixa e sair do aperto.' },
+  { id:3, title:'5 passos para montar sua reserva de emergência', instructor:'Me Poupe!', category:'orcamento', difficulty:'iniciante', durationMinutes:10, youtubeId:'egtTW_zvqJM', xpReward:60, description:'Aprenda de forma rápida e prática como montar uma reserva de emergência em 5 passos simples e acessíveis.' },
+  { id:4, title:'Como sair das dívidas com dicas reais', instructor:'O Primo Rico', category:'divida', difficulty:'iniciante', durationMinutes:13, youtubeId:'8zj0GJKTWwE', xpReward:50, description:'Thiago Nigro explica estratégias reais para sair das dívidas, incluindo método bola de neve e avalanche.' },
+  { id:5, title:'4 maneiras de fazer renda extra em 2026', instructor:'O Primo Rico', category:'renda', difficulty:'iniciante', durationMinutes:19, youtubeId:'7pw1Ct3LAec', xpReward:70, description:'Veja 4 formas práticas de criar renda extra sem sair de casa, ideais para qualquer rotina e nível de experiência.' },
+  { id:6, title:'10 truques para economizar no supermercado', instructor:'Me Poupe!', category:'orcamento', difficulty:'iniciante', durationMinutes:13, youtubeId:'UA0tP8ElL9Y', xpReward:55, description:'Me Poupe! revela 10 truques pouco conhecidos para gastar menos nas compras do mercado em 2025.' },
 ];
 
 const ACHIEVEMENTS_BASE = [
@@ -149,7 +149,6 @@ function refreshVideosFromServer() {
 }
 
 function getVideosList() {
-  if (Array.isArray(D.videos) && D.videos.length) return D.videos;
   return [...VIDEOS];
 }
 
@@ -333,16 +332,30 @@ function navigate(page) {
   document.getElementById('tbPage').textContent = PAGE_LABELS[page] || page;
 
   // Fechar sidebar mobile
-  if (window.innerWidth <= 680) {
-    document.getElementById('sidebar').classList.remove('open');
-  }
+  closeSidebarMobile();
 
   const loaders = { dashboard:loadDash, transactions:loadTx, cofrinho:loadCofrinho, goals:loadGoals, missions:loadMiss, videos:loadVideos, achievements:loadAch, rewards:loadRew, leaderboard:loadLB, profile:loadProfile };
   if (loaders[page]) loaders[page]();
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const isOpen = sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+function closeSidebarMobile() {
+  if (window.innerWidth <= 680) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+      if (overlay) overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
 }
 
 // ===== USER =====
@@ -1137,6 +1150,7 @@ function loadProfile() {
   document.getElementById('profileCurrentPassword').value = '';
   document.getElementById('profileNewPassword').value = '';
   document.getElementById('profileMsg').textContent = '';
+  populateA11yForm();
 }
 
 function saveProfile() {
@@ -1200,7 +1214,66 @@ function closeAllModals() {
   document.getElementById('overlay').classList.remove('open');
 }
 
+
+// ===== ACESSIBILIDADE =====
+const A11Y_KEY = 'mq_a11y';
+
+function loadAccessibility() {
+  const saved = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  applyAccessibility(saved);
+}
+
+function applyAccessibility(s) {
+  const html = document.documentElement;
+  html.dataset.theme  = s.theme  || 'dark';
+  html.dataset.font   = s.font   || 'normal';
+  html.dataset.vision = s.vision || 'normal';
+}
+
+function setThemePref(theme) {
+  document.documentElement.dataset.theme = theme;
+  const saved = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  saved.theme = theme;
+  localStorage.setItem(A11Y_KEY, JSON.stringify(saved));
+  updateThemeButtons(theme);
+}
+
+function updateThemeButtons(theme) {
+  const btnDark  = document.getElementById('btnThemeDark');
+  const btnLight = document.getElementById('btnThemeLight');
+  if (btnDark)  btnDark.classList.toggle('active',  theme === 'dark');
+  if (btnLight) btnLight.classList.toggle('active', theme === 'light');
+}
+
+function saveAccessibility() {
+  const font   = document.getElementById('a11yFont')   ? document.getElementById('a11yFont').value   : 'normal';
+  const vision = document.getElementById('a11yVision') ? document.getElementById('a11yVision').value : 'normal';
+  const theme  = document.documentElement.dataset.theme || 'dark';
+
+  const s = { font, vision, theme };
+  localStorage.setItem(A11Y_KEY, JSON.stringify(s));
+  applyAccessibility(s);
+  updateThemeButtons(theme);
+
+  const msg = document.getElementById('a11yMsg');
+  if (msg) {
+    msg.textContent = '✓ Configurações de acessibilidade salvas!';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  }
+  toast('Acessibilidade salva com sucesso', 'success');
+}
+
+function populateA11yForm() {
+  const s = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+  const fontEl   = document.getElementById('a11yFont');
+  const visionEl = document.getElementById('a11yVision');
+  if (fontEl)   fontEl.value   = s.font   || 'normal';
+  if (visionEl) visionEl.value = s.vision || 'normal';
+  updateThemeButtons(s.theme || 'dark');
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
+  loadAccessibility();
   checkLoginStatus();
 });
