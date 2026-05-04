@@ -37,6 +37,78 @@
   --shadow:    0 2px 12px #00000040;
 }
 
+/* ===== MODO CLARO ===== */
+html[data-theme="light"] {
+  --bg:      #f0f2f5;
+  --bg2:     #ffffff;
+  --bg3:     #e8eaed;
+  --bg4:     #dde1e7;
+  --border:  #0000001a;
+  --border2: #00000020;
+  --border3: #00000035;
+  --text:    #1a1a2e;
+  --text2:   #44445a;
+  --text3:   #7777a0;
+  --p-glow:  #6d28d918;
+  --g-glow:  #d9770618;
+  --g2-glow: #05966918;
+  --r-glow:  #dc262618;
+  --b-glow:  #2563eb18;
+  --pig-glow:#be185d18;
+  --shadow:  0 2px 12px #00000020;
+}
+html[data-theme="light"] body {
+  background: var(--bg);
+}
+html[data-theme="light"] .login-screen {
+  background-image: radial-gradient(circle at 20% 10%, #3b82f615, transparent 35%),
+    radial-gradient(circle at 80% 10%, #f59e0b15, transparent 40%),
+    linear-gradient(135deg, #dde8f5 0%, #f0f2f5 100%);
+}
+html[data-theme="light"] .login-box {
+  background: rgba(255,255,255,0.97);
+}
+
+/* ===== FONTE GRANDE ===== */
+html[data-font="grande"] { zoom: 1.125; }
+html[data-font="muito-grande"] { zoom: 1.27; }
+
+/* ===== DALTONISMO (filtros SVG) ===== */
+html[data-vision="protanopia"]    body { filter: url(#a11y-protanopia); }
+html[data-vision="deuteranopia"]  body { filter: url(#a11y-deuteranopia); }
+html[data-vision="tritanopia"]    body { filter: url(#a11y-tritanopia); }
+html[data-vision="achromatopsia"] body { filter: url(#a11y-achromatopsia); }
+
+/* ===== BOTÕES DE TEMA ===== */
+.a11y-theme-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  border: 2px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.a11y-theme-btn:hover { border-color: var(--purple2); color: var(--text); }
+.a11y-theme-btn.active {
+  background: var(--p-glow);
+  border-color: var(--purple2);
+  color: var(--purple3);
+}
+
+/* ===== ACCESSIBILITY CARD SECTION ===== */
+.a11y-card { margin-top: 18px; }
+.a11y-section-title {
+  font-size: 15px; font-weight: 800; color: var(--text);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 8px;
+}
+
+
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
@@ -668,25 +740,72 @@ tbody tr:hover td { background: var(--bg3); }
 .toast.info    .toast-icon { background: var(--p-glow); color: var(--purple3); }
 @keyframes slideIn { from { opacity:0; transform: translateX(16px); } }
 
-/* RESPONSIVE */
+/* SIDEBAR OVERLAY (mobile backdrop) */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: #00000060;
+  z-index: 99;
+}
+.sidebar-overlay.open { display: block; }
+
+/* RESPONSIVE — tablet */
 @media (max-width: 900px) {
   .g4 { grid-template-columns: repeat(2,1fr); }
   .g21 { grid-template-columns: 1fr; }
   .g3 { grid-template-columns: repeat(2,1fr); }
 }
 
+/* RESPONSIVE — mobile */
 @media (max-width: 680px) {
   :root { --sidebar-w: 0px; }
+
   .sidebar {
     transform: translateX(-240px);
     width: 240px;
+    box-shadow: 4px 0 24px #00000060;
   }
-  .sidebar.open { transform: translateX(0); --sidebar-w: 240px; }
+  .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; }
   .menu-btn { display: flex; }
-  .content { padding: 16px; }
+
+  .topbar { padding: 10px 12px; }
+  .topbar-right { gap: 6px; }
+  .xp-badge { font-size: 11px; padding: 3px 7px; }
+  .level-badge { display: none; }
+  .topbar-right .btn { padding: 4px 9px; font-size: 11px; }
+
+  .content { padding: 14px 12px; }
+  .page-title { font-size: 20px; }
+
   .g4, .g3, .g2 { grid-template-columns: 1fr; }
   .cofrinho-grid { grid-template-columns: 1fr; }
-  .topbar { padding: 10px 14px; }
-  .xp-badge, .level-badge { font-size: 11px; padding: 3px 8px; }
+
+  .modal { padding: 12px; align-items: flex-end; }
+  .modal-box {
+    max-width: 100% !important;
+    border-radius: 14px 14px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .toasts { bottom: 14px; right: 12px; left: 12px; }
+  .toast { max-width: 100%; }
+
+  .stat-card-value { font-size: 19px; }
+  .table-wrap { font-size: 12px; }
+  thead th, tbody td { padding: 9px 10px; }
+
+  .mission-card { flex-wrap: wrap; }
+  .lb-item.lb-me { margin: 4px -8px; padding: 10px; }
+}
+
+/* RESPONSIVE — very small */
+@media (max-width: 380px) {
+  .topbar-page { font-size: 13px; }
+  .xp-badge { display: none; }
+  .content { padding: 12px 10px; }
+  .card { padding: 14px; }
+  .stat-card { padding: 12px; }
+  .stat-card-value { font-size: 17px; }
 }
